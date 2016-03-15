@@ -3,13 +3,33 @@
 // angular.module is a global place for creating, registering and retrieving Angular modules
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
-angular.module('ToDo', ['ionic', 'LocalStorageModule']);
-app.config(function(LocalStorageServiceProvider) {
-  LocalStorageServiceProvider
-  .setPrefix('todo');
+var app = angular.module('ionic-todo', ['ionic', 'LocalStorageModule']);
+app.run(function ($ionicPlatform) {
+    $ionicPlatform.ready(function () {
+        if (window.cordova && window.cordova.plugins.Keyboard) {
+            // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
+            // for form inputs)
+            cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
+
+            // Don't remove this line unless you know what you are doing. It stops the viewport
+            // from snapping when text inputs are focused. Ionic handles this internally for
+            // a much nicer keyboard experience.
+            cordova.plugins.Keyboard.disableScroll(true);
+        }
+        if (window.StatusBar) {
+            StatusBar.styleDefault();
+        }
+    });
+});
+app.config(function(localStorageServiceProvider) {
+  localStorageServiceProvider
+  .setPrefix('ionic-todo');
 });
 
-app.controller('main', function($scope, $ionicModal, LocalStorageService) {
+app.controller('main', function($scope, $ionicModal, localStorageService) {
+
+  var taskData = 'task';
+
   $scope.tasks = [];
 
   $scope.task = {};
@@ -22,29 +42,39 @@ app.controller('main', function($scope, $ionicModal, LocalStorageService) {
   });
 
   $scope.getTasks = function() {
-    if (LocalStorageService.get(taskData)) {
-      $scope.tasks = LocalStorageService.get(taskData);
+    if (localStorageService.get(taskData)) {
+      $scope.tasks = localStorageService.get(taskData);
     } else {
       $scope.tasks = [];
     }
-  }
+  };
 
   $scope.createTask = function() {
     $scope.tasks.push($scope.task);
-    LocalStorageService.set(taskData, $scope.tasks);
+    localStorageService.set(taskData, $scope.tasks);
     $scope.task = {};
     $scope.newTaskModal.hide();
-  }
+  };
 
-  $scope.removeTask = function () {
+  $scope.removeTask = function (index) {
     $scope.tasks.splice(index, 1);
-    LocalStorageService.set(taskData, $scope.tasks);
-  }
+    localStorageService.set(taskData, $scope.tasks);
+  };
+
   $scope.completeTask = function() {
     if (index !== -1) {
       $scope.tasks[index].completed = true;
     }
-    LocalStorageService.set(taskData, $scope.tasks);
-  }
-})
+    localStorageService.set(taskData, $scope.tasks);
+  };
+
+  $scope.openTaskModal = function () {
+    $scope.newTaskModal.show();
+  };
+
+  $scope.closeTaskModal = function () {
+    $scope.newTaskModal.hide();
+    };
+
+});
 
